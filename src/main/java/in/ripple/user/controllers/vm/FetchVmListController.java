@@ -1,7 +1,7 @@
 package in.ripple.user.controllers.vm;
 
 import com.google.gson.Gson;
-import in.ripple.user.ErrorResponse;
+import in.ripple.user.util.ErrorResponse;
 import in.ripple.user.configuration.JwtTokenUtil;
 import in.ripple.user.controllers.AbstractRestController;
 import in.ripple.user.controllers.vm.model.FetchVmListRequest;
@@ -11,7 +11,6 @@ import in.ripple.user.persistence.dao.UserVMMappingDaoService;
 import in.ripple.user.persistence.dao.VirtualMachineDaoService;
 import in.ripple.user.persistence.entity.VirtualMachine;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

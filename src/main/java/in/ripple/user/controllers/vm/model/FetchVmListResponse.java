@@ -1,6 +1,6 @@
 package in.ripple.user.controllers.vm.model;
 
-import in.ripple.user.controllers.AbstractResponse;
+import in.ripple.user.util.AbstractResponse;
 import in.ripple.user.persistence.entity.VirtualMachine;
 
 import java.util.ArrayList;

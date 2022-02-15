@@ -1,7 +1,7 @@
 package in.ripple.user.controllers.vm;
 
 import com.google.gson.Gson;
-import in.ripple.user.ErrorResponse;
+import in.ripple.user.util.ErrorResponse;
 import in.ripple.user.Exception.InternalException;
 import in.ripple.user.Exception.UserNotFoundException;
 import in.ripple.user.configuration.JwtTokenUtil;
@@ -15,7 +15,6 @@ import in.ripple.user.persistence.entity.UserEntity;
 import in.ripple.user.persistence.entity.UserVmMapping;
 import in.ripple.user.persistence.entity.VirtualMachine;
 import in.ripple.user.util.Validator;
-import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package in.ripple.user.controllers.authentication.model;
 
-import in.ripple.user.controllers.AbstractResponse;
+import in.ripple.user.util.AbstractResponse;
 
 public class SignupResponse extends AbstractResponse {
 

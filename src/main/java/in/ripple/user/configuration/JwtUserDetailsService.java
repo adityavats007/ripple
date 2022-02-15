@@ -1,13 +1,9 @@
 package in.ripple.user.configuration;
 
-import in.ripple.user.ErrorResponse;
-import in.ripple.user.Exception.UserNotFoundException;
 import in.ripple.user.persistence.dao.UserDaoService;
 import in.ripple.user.persistence.entity.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

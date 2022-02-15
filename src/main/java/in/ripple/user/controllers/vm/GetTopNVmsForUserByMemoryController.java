@@ -1,7 +1,7 @@
 package in.ripple.user.controllers.vm;
 
 import com.google.gson.Gson;
-import in.ripple.user.ErrorResponse;
+import in.ripple.user.util.ErrorResponse;
 import in.ripple.user.Exception.InternalException;
 import in.ripple.user.Exception.UserNotFoundException;
 import in.ripple.user.configuration.JwtTokenUtil;

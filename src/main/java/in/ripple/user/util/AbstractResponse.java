@@ -1,4 +1,4 @@
-package in.ripple.user.controllers;
+package in.ripple.user.util;
 
 public class AbstractResponse {
     String status;

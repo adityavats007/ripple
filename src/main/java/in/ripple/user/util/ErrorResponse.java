@@ -1,4 +1,4 @@
-package in.ripple.user;
+package in.ripple.user.util;
 
 import lombok.Getter;
 import lombok.Setter;
