@@ -1,18 +1,16 @@
-INSERT INTO access(
+1.  INSERT INTO access(
 	id, api)
 	(1, 'getTopVmByMemory'),
 	(2, 'deleteUser'),
 	(3, 'getTopVmsByUser'),
 	(4, 'assignVm'),
 	(5, 'fetchVmList');
-
-
-	INSERT INTO role(id, role)
+---------------------------------------------
+2.	INSERT INTO role(id, role)
     	VALUES (11, 'MASTER'),
     	       (12, 'DEFAULT');
-
-
-    	INSERT INTO role_access_mapping(id,access, role)
+---------------------------------------------------
+3.   	INSERT INTO role_access_mapping(id,access, role)
             	VALUES (111, (select id from access where api='getTopVmByMemory'),(select id from role where role='MASTER')),
             	 (112, (select id from access where api='deleteUser'),(select id from role where role='MASTER')),
             	(113, (select id from access where api='getTopVmsByUser'),(select id from role where role='MASTER')),
