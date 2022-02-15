@@ -130,8 +130,8 @@ public class VmProvisionerController extends AbstractRestController {
         } catch (Exception e) {
             return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Some internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-         AssignVmResponse response= new AssignVmResponse("200","VM assignment done");
-         return new ResponseEntity(response, HttpStatus.OK);
+        AssignVmResponse response = new AssignVmResponse("200", "VM assignment done");
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
 }

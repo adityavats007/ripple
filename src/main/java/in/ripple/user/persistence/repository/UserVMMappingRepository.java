@@ -31,5 +31,4 @@ public interface UserVMMappingRepository extends JpaRepository<UserVmMapping, Lo
     public long findUserByVm(long vm);
 
 
-
 }

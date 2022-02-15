@@ -4,7 +4,7 @@ public class DuplicateUserException extends CustomException {
 
 
     public DuplicateUserException(String errorMessage) {
-        super(errorMessage,errorMessage);
+        super(errorMessage, errorMessage);
 
     }
 

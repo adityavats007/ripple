@@ -1,8 +1,11 @@
 package in.ripple.user.util;
 
 public class AbstractResponse {
+
     String status;
+
     String code;
+
     String message;
 
     public AbstractResponse() {

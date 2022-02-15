@@ -14,6 +14,7 @@ import java.util.List;
 
 @Service
 public class UserVMMappingDaoService {
+
     @Autowired
     UserVMMappingRepository userVMMappingRepository;
 
@@ -26,15 +27,15 @@ public class UserVMMappingDaoService {
     }
 
     public void deAllocateMachinesForUser(long userID) {
-         userVMMappingRepository.deAllocateMachinesForUser(userID);
+        userVMMappingRepository.deAllocateMachinesForUser(userID);
     }
 
     public List<Integer> findAllVmIdsByUser(long userID, int pageSize, int offset) {
-        return userVMMappingRepository.findAllVmIdsByUser(userID,pageSize,offset);
+        return userVMMappingRepository.findAllVmIdsByUser(userID, pageSize, offset);
     }
 
     public void saveAll(List<UserVmMapping> userVmMappings) {
-         userVMMappingRepository.saveAll(userVmMappings);
+        userVMMappingRepository.saveAll(userVmMappings);
     }
 
     public long findUserByVm(long vmId) {

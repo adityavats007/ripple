@@ -16,7 +16,7 @@ public class HashUtil {
         return new String(msgInBase64Bytes);
     }
 
-    public static byte[] decodeBase64(String base64String){
+    public static byte[] decodeBase64(String base64String) {
         return Base64.decodeBase64(base64String);
     }
 

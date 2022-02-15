@@ -25,7 +25,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private EntryPoint jwtAuthenticationEntryPoint;
@@ -55,7 +55,7 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/master/**").access("hasAuthority('master')").
 
 // all other requests need to be authenticated
-                anyRequest().authenticated().and().
+        anyRequest().authenticated().and().
 // make sure we use stateless session; session won't be used to
 // store user's state.
         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
@@ -63,15 +63,17 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
-     /**custom match logic
-     1. if the request is login or signup then it will permit
-     2. if the request contains headers key "clientAuth" with valid value then the request will go through, this is added in case if internal http call happens
-      then the token won't get validated twice. In case it needs to be validated then token can be passed and the custom condition can be removed
-      */
+    /**
+     * custom match logic
+     * 1. if the request is login or signup then it will permit
+     * 2. if the request contains headers key "clientAuth" with valid value then the request will go through, this is added in case if internal http call happens
+     * then the token won't get validated twice. In case it needs to be validated then token can be passed and the custom condition can be removed
+     */
     private class MyRequestMatcher implements RequestMatcher {
-        public boolean matches(HttpServletRequest request){
+
+        public boolean matches(HttpServletRequest request) {
             //Define the matching logic here
-            if(request.getRequestURL().toString().contains("login")||request.getRequestURL().toString().contains("signUp")){
+            if (request.getRequestURL().toString().contains("login") || request.getRequestURL().toString().contains("signUp")) {
                 return true;
             }
             return false;

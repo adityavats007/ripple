@@ -104,7 +104,7 @@ public class GetTopNVmsForUserByMemoryController extends AbstractRestController 
         }
         response.setMessage("VM list fetched successfully");
         response.setCode("200");
-        return new ResponseEntity(response,HttpStatus.OK);
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
 }

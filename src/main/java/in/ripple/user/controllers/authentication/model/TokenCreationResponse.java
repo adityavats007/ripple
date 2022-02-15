@@ -3,7 +3,8 @@ package in.ripple.user.controllers.authentication.model;
 import in.ripple.user.util.AbstractResponse;
 
 public class TokenCreationResponse extends AbstractResponse {
-    private  String jwttoken;
+
+    private String jwttoken;
 
     public String getJwttoken() {
         return jwttoken;
@@ -19,7 +20,6 @@ public class TokenCreationResponse extends AbstractResponse {
 
     public TokenCreationResponse() {
     }
-
 
 
     public TokenCreationResponse(String status, String message, String jwttoken) {

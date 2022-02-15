@@ -142,7 +142,7 @@ public class SignupController extends AbstractRestController {
             return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Some internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         LOG.info("User signed up successfully");
-        SignupResponse signupResponse = new SignupResponse("200","Signup Success");
+        SignupResponse signupResponse = new SignupResponse("200", "Signup Success");
 
         return new ResponseEntity(signupResponse, HttpStatus.OK);
 

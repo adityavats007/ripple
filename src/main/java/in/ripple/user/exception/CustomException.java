@@ -1,6 +1,6 @@
 package in.ripple.user.exception;
 
-public abstract class CustomException extends Exception{
+public abstract class CustomException extends Exception {
 
 
     private String errorMessage;

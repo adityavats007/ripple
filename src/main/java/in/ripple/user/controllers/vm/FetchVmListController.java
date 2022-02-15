@@ -59,8 +59,8 @@ public class FetchVmListController extends AbstractRestController {
         if (vmList.size() > 0) {
             try {
                 response.setVirtualMachineList(vmList);
-            }catch (Exception e){
-                LOG.error("Error while setting vm list",e);
+            } catch (Exception e) {
+                LOG.error("Error while setting vm list", e);
                 return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Some internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 

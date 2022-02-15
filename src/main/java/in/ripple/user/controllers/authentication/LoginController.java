@@ -68,8 +68,7 @@ public class LoginController extends AbstractRestController {
             String token = generateToken(userDetails);
 
             response.setJwttoken(token);
-        }
-        catch (UserNotFoundException e) {
+        } catch (UserNotFoundException e) {
             return new ResponseEntity(new ErrorResponse(HttpStatus.NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
 
         } catch (InternalException e) {

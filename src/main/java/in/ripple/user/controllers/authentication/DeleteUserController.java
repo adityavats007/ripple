@@ -60,59 +60,59 @@ public class DeleteUserController extends AbstractRestController {
         LOG.info("started executing {}", this.getClass().getName());
         DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
         final DeleteUserRequest vmRequest = new Gson().fromJson(jsonRequest, DeleteUserRequest.class);
-    try {
-        final String idType = vmRequest.getIdentifierType();
+        try {
+            final String idType = vmRequest.getIdentifierType();
 
-        final String idValue = vmRequest.getIdentifierValue();
-        if (!(validator.isValidString(idType) && validator.isValidString(idValue))) {
-            LOG.error("Invalid input");
-            throw new InternalException("Invalid input");
-        }
-
-        UserEntity userEntity = null;
-
-        if (UserConstants.MOBILE.equalsIgnoreCase(idType)) {
-
-            userEntity = userDaoService.findByEmail(idValue);
-
-        } else if (UserConstants.EMAIL.equalsIgnoreCase(idType)) {
-
-            userEntity = userDaoService.findByMobile(idValue);
-
-        } else if (UserConstants.USER_NAME.equalsIgnoreCase(idType)) {
-
-            userEntity = userDaoService.findByUserName(idValue);
-
-        }
-        if (null != userEntity) {
-
-            userEntity.setDeleted(true);
-            userDaoService.save(userEntity);//first marking the user as deleted
-
-            try {
-                //de allocate the VMs
-                deAllocateVm(userEntity);
-
-            } catch (Exception e) {
-                //consuming this exception.
-                LOG.error("Error while deAllocation of vms", e);
+            final String idValue = vmRequest.getIdentifierValue();
+            if (!(validator.isValidString(idType) && validator.isValidString(idValue))) {
+                LOG.error("Invalid input");
+                throw new InternalException("Invalid input");
             }
 
-        } else {
-            LOG.info("No user found");
+            UserEntity userEntity = null;
 
-            throw new UserNotFoundException("No user found");
+            if (UserConstants.MOBILE.equalsIgnoreCase(idType)) {
+
+                userEntity = userDaoService.findByEmail(idValue);
+
+            } else if (UserConstants.EMAIL.equalsIgnoreCase(idType)) {
+
+                userEntity = userDaoService.findByMobile(idValue);
+
+            } else if (UserConstants.USER_NAME.equalsIgnoreCase(idType)) {
+
+                userEntity = userDaoService.findByUserName(idValue);
+
+            }
+            if (null != userEntity) {
+
+                userEntity.setDeleted(true);
+                userDaoService.save(userEntity);//first marking the user as deleted
+
+                try {
+                    //de allocate the VMs
+                    deAllocateVm(userEntity);
+
+                } catch (Exception e) {
+                    //consuming this exception.
+                    LOG.error("Error while deAllocation of vms", e);
+                }
+
+            } else {
+                LOG.info("No user found");
+
+                throw new UserNotFoundException("No user found");
+            }
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
+
+        } catch (InternalException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
+
+        } catch (Exception e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
-    } catch (UserNotFoundException e){
-        return new ResponseEntity(new ErrorResponse(HttpStatus.NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
-
-    } catch (InternalException e){
-        return new ResponseEntity(new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
-
-    } catch (Exception e){
-        return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-
-    }
         deleteUserResponse.setMessage("user deleted successfully");
         deleteUserResponse.setCode("200");
         return new ResponseEntity(deleteUserResponse, HttpStatus.OK);
@@ -144,7 +144,7 @@ public class DeleteUserController extends AbstractRestController {
             });
             userVMMappingDaoService.saveAll(updatedUserVmMapping);
             LOG.info("Mapped vms are de allocated for user {}", userEntity.getUserName());
-        }else{
+        } else {
             LOG.info("No allocated VMs for this user");
         }
         //free the VMs in vmIdList

@@ -23,6 +23,7 @@ import java.io.IOException;
  */
 @Component
 public class RequestFilter extends OncePerRequestFilter {
+
     private static final Logger LOG = LoggerFactory.getLogger(RequestFilter.class);
 
 

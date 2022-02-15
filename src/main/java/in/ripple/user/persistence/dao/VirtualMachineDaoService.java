@@ -17,7 +17,7 @@ public class VirtualMachineDaoService {
 
     public List<VirtualMachine> findTopNByMemory(int size, int offset) {
 
-        return virtualMachineRepository.findTopNByMemory(size,offset);
+        return virtualMachineRepository.findTopNByMemory(size, offset);
 
     }
 
@@ -30,15 +30,15 @@ public class VirtualMachineDaoService {
     }
 
 
-
     public void saveAll(List<VirtualMachine> vms) {
         virtualMachineRepository.saveAll(vms);
     }
+
     public List<VirtualMachine> findAll(List<Long> ids) {
         return virtualMachineRepository.findAllById(ids);
     }
 
     public List<VirtualMachine> findByPageSizeAndOffset(int pageSize, int offset) {
-        return virtualMachineRepository.findByPageSizeAndOffset(pageSize,offset);
+        return virtualMachineRepository.findByPageSizeAndOffset(pageSize, offset);
     }
 }

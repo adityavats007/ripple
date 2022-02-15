@@ -27,6 +27,7 @@ public class UserDaoService {
     public UserEntity findByEmail(String email) {
         return userRepository.getUSerByEmail(email);
     }
+
     public UserEntity findByMobile(String mobile) {
         return userRepository.getUserByMobile(mobile);
     }
@@ -36,9 +37,9 @@ public class UserDaoService {
     }
 
     public UserEntity findById(long id) {
-        List<Long> idList=new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
         idList.add(id);
-        return userRepository.findAllById(idList).size()>0?userRepository.findAllById(idList).get(0):null;
+        return userRepository.findAllById(idList).size() > 0 ? userRepository.findAllById(idList).get(0) : null;
     }
 
 }

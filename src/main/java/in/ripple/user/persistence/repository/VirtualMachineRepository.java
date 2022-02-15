@@ -16,14 +16,13 @@ public interface VirtualMachineRepository extends JpaRepository<VirtualMachine, 
 
 
     @Query(nativeQuery = true, value = "select * from virtual_machine where is_allocated= true order by ram_size desc LIMIT ?1 OFFSET ?2")
-    public List<VirtualMachine> findTopNByMemory(int size,int offset);
+    public List<VirtualMachine> findTopNByMemory(int size, int offset);
 
     @Query(nativeQuery = true, value = "select * from virtual_machine where id in ?1")
     public List<VirtualMachine> findAllById(List<Integer> id);
 
     @Query(nativeQuery = true, value = "select * from virtual_machine where is_allocated = false order by ram_size desc LIMIT ?1 OFFSET ?2")
     public List<VirtualMachine> findByPageSizeAndOffset(int pageSize, int offset);
-
 
 
 }
