@@ -1,17 +1,23 @@
 package in.ripple.user.controllers.vm.model;
 
+import in.ripple.user.controllers.AbstractResponse;
 import in.ripple.user.persistence.entity.VirtualMachine;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class GetTopVmsByMemoryResponse {
-    List<VirtualMachine> vmList;
+public class GetTopVmsByMemoryResponse extends AbstractResponse {
+    List<VirtualMachine> virtualMachineList;
 
-    public List<VirtualMachine> getVmList() {
-        return vmList;
+    public GetTopVmsByMemoryResponse() {
+        this.virtualMachineList = new ArrayList<>();
     }
 
-    public void setVmList(List<VirtualMachine> vmList) {
-        this.vmList = vmList;
+    public List<VirtualMachine> getVirtualMachineList() {
+        return virtualMachineList;
+    }
+
+    public void setVirtualMachineList(List<VirtualMachine> virtualMachineList) {
+        this.virtualMachineList = virtualMachineList;
     }
 }

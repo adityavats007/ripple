@@ -21,7 +21,7 @@ public class SimilarServiceApiCaller implements InternalApiClient {
     @Override
     public String callApi(HttpServletRequest servletRequest,String apiName, String requestBody) throws InternalException {
         final AbstractRestController controller = (AbstractRestController) applicationContext.getBean(apiName);
-        String response="";
+        Object response="";
         try {
             response=controller.process(servletRequest,requestBody);
         } catch (InternalException exception) {
@@ -32,6 +32,6 @@ public class SimilarServiceApiCaller implements InternalApiClient {
             LOG.error("Error while processing internal api call ",e);
             throw new InternalException(e.getMessage());
         }
-        return response;
+        return response.toString();
     }
 }

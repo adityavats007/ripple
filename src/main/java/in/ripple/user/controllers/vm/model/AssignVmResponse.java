@@ -1,5 +1,13 @@
 package in.ripple.user.controllers.vm.model;
 
-public class AssignVmResponse {
+import in.ripple.user.controllers.AbstractResponse;
 
+public class AssignVmResponse extends AbstractResponse {
+
+    public AssignVmResponse(String status, String message) {
+        super(status, message);
+    }
+
+    public AssignVmResponse() {
+    }
 }

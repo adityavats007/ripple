@@ -6,10 +6,10 @@ import in.ripple.user.persistence.entity.VirtualMachine;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetTopVmsFoUserResponse extends AbstractResponse {
+public class FetchVmListResponse extends AbstractResponse {
     List<VirtualMachine> virtualMachineList;
 
-    public GetTopVmsFoUserResponse() {
+    public FetchVmListResponse() {
         this.virtualMachineList = new ArrayList<>();
     }
 

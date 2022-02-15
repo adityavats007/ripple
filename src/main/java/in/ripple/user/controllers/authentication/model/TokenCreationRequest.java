@@ -1,7 +1,13 @@
 package in.ripple.user.controllers.authentication.model;
 
+import lombok.NonNull;
+
 public class TokenCreationRequest {
+
+    @NonNull
     private String username;
+
+    @NonNull
     private String password;
 
     public String getUsername() {

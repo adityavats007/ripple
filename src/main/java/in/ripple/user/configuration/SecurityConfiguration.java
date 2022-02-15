@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -46,12 +48,14 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
 
 
         httpSecurity.csrf().disable()
-                .authorizeRequests().requestMatchers(new MyRequestMatcher()).permitAll().
 // dont authenticate this particular request
-//                .authorizeRequests().requestMatchers().antMatchers("/login","/signUp","/**/**/**/login","/{api}/{auth}/{v1}/signUp").permitAll().
+                .authorizeRequests()
+                .requestMatchers(new MyRequestMatcher()).permitAll().
+//                .antMatchers("/default/**").access("hasAuthority('default')")
+//                .antMatchers("/master/**").access("hasAuthority('master')").
 
 // all other requests need to be authenticated
-        anyRequest().authenticated().and().
+                anyRequest().authenticated().and().
 // make sure we use stateless session; session won't be used to
 // store user's state.
         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
@@ -68,10 +72,6 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
         public boolean matches(HttpServletRequest request){
             //Define the matching logic here
             if(request.getRequestURL().toString().contains("login")||request.getRequestURL().toString().contains("signUp")){
-                return true;
-            }
-            if(request.getHeader("is_authenticated") != null &&
-                    request.getHeader("is_authenticated").equalsIgnoreCase("true")){
                 return true;
             }
             return false;

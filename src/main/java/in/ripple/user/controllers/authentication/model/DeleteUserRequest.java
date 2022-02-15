@@ -1,7 +1,9 @@
 package in.ripple.user.controllers.authentication.model;
 
 public class DeleteUserRequest {
+
     String identifierType;
+
     String identifierValue;
 
     public String getIdentifierType() {

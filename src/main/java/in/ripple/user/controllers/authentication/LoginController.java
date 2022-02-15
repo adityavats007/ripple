@@ -1,7 +1,7 @@
 package in.ripple.user.controllers.authentication;
 
 import com.google.gson.Gson;
-import com.sun.media.jfxmedia.logging.Logger;
+import in.ripple.user.ErrorResponse;
 import in.ripple.user.Exception.InternalException;
 import in.ripple.user.Exception.UserNotFoundException;
 import in.ripple.user.configuration.JwtTokenUtil;
@@ -12,16 +12,13 @@ import in.ripple.user.controllers.authentication.model.TokenCreationResponse;
 import in.ripple.user.persistence.dao.UserDaoService;
 import in.ripple.user.persistence.entity.UserEntity;
 import in.ripple.user.util.HashUtil;
+import in.ripple.user.util.Validator;
 import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -43,74 +40,74 @@ public class LoginController extends AbstractRestController {
     @Autowired
     UserDaoService userDaoService;
 
+    @Autowired
+    Validator validator;
+
     @Override
     @CrossOrigin
-    @PostMapping(value = "login", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/{userRole}/login", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public String process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws UserNotFoundException,InternalException {
-
+    public Object process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws UserNotFoundException, InternalException {
+        TokenCreationResponse response = new TokenCreationResponse();
         TokenCreationRequest tokenCreationRequest = new Gson().fromJson(jsonRequest, TokenCreationRequest.class);
-
         try {
 
-            authenticateUser(tokenCreationRequest.getUsername(), tokenCreationRequest.getPassword());
+            try {
+                if (!(validator.isValidString(tokenCreationRequest.getUsername()) && validator.isValidString(tokenCreationRequest.getPassword()))) {
+                    LOG.error("Invalid input");
+                    throw new InternalException("Invalid input");
+                }
+                authenticateUser(tokenCreationRequest.getUsername(), tokenCreationRequest.getPassword());
 
+            } catch (UserNotFoundException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new InternalException(e.getMessage(), e.getMessage());
+            }
+            final UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(tokenCreationRequest.getUsername());
+
+            String token = generateToken(userDetails);
+
+            response.setJwttoken(token);
         }
-        catch (UserNotFoundException e){
-            throw e;
+        catch (UserNotFoundException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
+
+        } catch (InternalException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
-        catch (Exception e){
-            throw new InternalException(e.getMessage(),e.getMessage());
-        }
-        final UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(tokenCreationRequest.getUsername());
-
-        String token = generateToken(userDetails);
-
-        JSONObject responseObject= new JSONObject();
-
-        responseObject.put("token",token);
-
-        responseObject.put("message","Login successful");
-
-        ResponseEntity.ok();
-
-        return responseObject.toJSONString();
+        response.setMessage("Login success");
+        response.setCode("200");
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
-    private String generateToken(UserDetails userDetails){
+    private String generateToken(UserDetails userDetails) {
         return jwtTokenUtil.generateToken(userDetails);
     }
 
-    private void authenticateUser(String username, String password) throws Exception {
-        try {
-                UserEntity userEntity= userDaoService.findByUserName(username);
+    private void authenticateUser(String username, String password) throws UserNotFoundException, InternalException {
 
-                if(null==userEntity){
+        UserEntity userEntity = userDaoService.findByUserName(username);
 
-                    LOG.info("No user found");
+        if (null == userEntity) {
 
-                    ResponseEntity.status(HttpStatus.NOT_FOUND);
+            LOG.info("No user found");
 
-                    throw new InternalException("No user found","No user found");
-                }else {
+            throw new UserNotFoundException("No user found", "No user found");
+        } else {
 
-                    String dbPassword = userEntity.getPassword();
+            String dbPassword = userEntity.getPassword();
 
-                    String decryptedBase64Password=new String(HashUtil.decodeBase64(password));
+            String decryptedBase64Password = new String(HashUtil.decodeBase64(password));
 
-                    String sha256Value   = new String(HashUtil.generateSha256Hash(decryptedBase64Password));
+            String sha256Value = new String(HashUtil.generateSha256Hash(decryptedBase64Password));
 
-                    if(!sha256Value.equals(dbPassword)){
-
-                       throw new InternalException("password invalid");
-                   }
-
-                }
-        } catch (InternalException e) {
-
-            throw new InternalException( e.getErrorMessage());
+            if (!sha256Value.equals(dbPassword)) {
+                throw new InternalException("password invalid");
+            }
 
         }
+
     }
 
 }

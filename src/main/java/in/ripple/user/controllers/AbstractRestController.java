@@ -12,6 +12,6 @@ public abstract class AbstractRestController {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractRestController.class);
 
-    public abstract String process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception;
+    public abstract Object process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception;
 
 }

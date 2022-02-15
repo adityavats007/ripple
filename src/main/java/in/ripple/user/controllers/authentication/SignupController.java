@@ -1,19 +1,20 @@
 package in.ripple.user.controllers.authentication;
 
 import com.google.gson.Gson;
+import in.ripple.user.ErrorResponse;
 import in.ripple.user.Exception.DuplicateUserException;
 import in.ripple.user.Exception.InternalException;
 import in.ripple.user.constants.UserConstants;
 import in.ripple.user.controllers.AbstractRestController;
 import in.ripple.user.controllers.authentication.model.SignupRequest;
-import in.ripple.user.persistence.dao.RoleDaoService;
+import in.ripple.user.controllers.authentication.model.SignupResponse;
 import in.ripple.user.persistence.dao.UserDaoService;
 import in.ripple.user.persistence.entity.UserEntity;
 import in.ripple.user.util.HashUtil;
 import in.ripple.user.util.Validator;
-import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,19 +39,22 @@ public class SignupController extends AbstractRestController {
     @Autowired
     Validator validator;
 
-    @Autowired
-    RoleDaoService roleDaoService;
+    @Value("${master.role.id}")
+    String masterId;
+
+    @Value("${default.role.id}")
+    String defaultId;
 
 
     @Override
     @CrossOrigin
-    @PostMapping(value = "signUp", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/{userRole}/signUp", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public String process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception {
+    public Object process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception {
         LOG.info("Started signup");
+
         final SignupRequest signupRequest = new Gson().fromJson(jsonRequest, SignupRequest.class);
 
-        final JSONObject response = new JSONObject();
 
         try {
             final String email = signupRequest.getEmail();
@@ -75,7 +79,7 @@ public class SignupController extends AbstractRestController {
 
             Boolean isUserNameUnique = isUnique("USER_NAME", username);
 
-            Long roleId=roleDaoService.getRoleFromName("DEFAULT").getId();
+            Long roleId = Long.parseLong(defaultId);
 
             if (isMobileUnique && isEmailUnique && isUserNameUnique) {
 
@@ -90,8 +94,11 @@ public class SignupController extends AbstractRestController {
                         LOG.error("Invalid role");
                         throw new InternalException("Invalid Role");
                     }
-                    roleId=roleDaoService.getRoleFromName(role).getId();
-
+                    if (role.equalsIgnoreCase("MASTER")) {
+                        roleId = Long.parseLong(masterId);
+                    } else {
+                        roleId = Long.parseLong(defaultId);
+                    }
                 }
 
 
@@ -99,7 +106,7 @@ public class SignupController extends AbstractRestController {
 
                 final String password = signupRequest.getPassword();
 
-                final String base64DecryptedPassword= new String(HashUtil.decodeBase64(password));
+                final String base64DecryptedPassword = new String(HashUtil.decodeBase64(password));
 
                 final String encryptedPassword = new String(HashUtil.generateSha256Hash(base64DecryptedPassword));
 
@@ -122,23 +129,22 @@ public class SignupController extends AbstractRestController {
 
                 userDaoService.save(userEntity);
 
-                response.put("message", "Sign up successful");
 
             } else {
                 LOG.error("Duplicate user info");
-                throw new InternalException("Duplicate user info found");
+                throw new DuplicateUserException("Duplicate user info found");
             }
+        } catch (InternalException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (DuplicateUserException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.CONFLICT, "Duplicate User Details"), HttpStatus.CONFLICT);
         } catch (Exception e) {
-            if (e.getClass().getSimpleName().equalsIgnoreCase("DuplicateUserException")) {
-                response.put("message", "Email or Mobile number already in use");
-                throw e;
-            } else {
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                throw new InternalException(e.getMessage());
-            }
+            return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Some internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         LOG.info("User signed up successfully");
-        return response.toJSONString();
+        SignupResponse signupResponse = new SignupResponse("200","Signup Success");
+
+        return new ResponseEntity(signupResponse, HttpStatus.OK);
 
     }
 
@@ -149,8 +155,8 @@ public class SignupController extends AbstractRestController {
             isUnique = userDaoService.findByEmail(value) == null;
         } else if (UserConstants.MOBILE.equalsIgnoreCase(type)) {
             isUnique = userDaoService.findByMobile(value) == null;
-        }else if (UserConstants.USER_NAME.equalsIgnoreCase(type)) {
-            isUnique = userDaoService.findByMobile(value) == null;
+        } else if (UserConstants.USER_NAME.equalsIgnoreCase(type)) {
+            isUnique = userDaoService.findByUserName(value) == null;
         }
 
         return isUnique;

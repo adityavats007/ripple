@@ -3,23 +3,22 @@ package in.ripple.user.controllers.vm;
 import com.google.gson.Gson;
 import in.ripple.user.controllers.AbstractRestController;
 import in.ripple.user.controllers.vm.model.GetTopVmsByMemoryRequest;
+import in.ripple.user.controllers.vm.model.GetTopVmsByMemoryResponse;
 import in.ripple.user.persistence.dao.UserDaoService;
 import in.ripple.user.persistence.dao.UserVMMappingDaoService;
 import in.ripple.user.persistence.dao.VirtualMachineDaoService;
-import in.ripple.user.persistence.entity.UserEntity;
-import in.ripple.user.persistence.entity.UserVmMapping;
 import in.ripple.user.persistence.entity.VirtualMachine;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @Component("getTopVmByMemory")
@@ -36,59 +35,25 @@ public class GetTopNVmsInSystemByMemoryController extends AbstractRestController
     @Autowired
     UserDaoService userDaoService;
 
+    @PreAuthorize("hasAuthority('getTopVmByMemory')")
     @Override
     @CrossOrigin
-    @PostMapping(value = "/getTopVmByMemory", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "{userRole}/getTopVmByMemory", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public String process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception {
-
+    public Object process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception {
+        GetTopVmsByMemoryResponse response = new GetTopVmsByMemoryResponse();
         final GetTopVmsByMemoryRequest vmRequest = new Gson().fromJson(jsonRequest, GetTopVmsByMemoryRequest.class);
 
         final List<VirtualMachine> vmList = virtualMachineDaoService.findTopNByMemory(vmRequest.getNumberOfMachines(), vmRequest.getOffset());
 
-        final JSONArray jsonArray = new JSONArray();
-
         if (vmList.size() > 0) {
-
-            vmList.forEach(vm -> {
-                try {
-
-                    final JSONObject jsonObject = new JSONObject();
-
-
-                    jsonObject.put("address", vm.getAddress());
-
-                    jsonObject.put("osType", vm.getOsType());
-
-                    jsonObject.put("memory", vm.getRamInBytes());
-
-                    jsonObject.put("hardDisk", vm.getHardDiskInBytes());
-
-                    jsonObject.put("cpuCores", vm.getCpuCores());
-
-                    jsonObject.put("vm_id", vm.getId());
-
-                    try {
-                        long userId = userVMMappingDaoService.findUserByVm(vm.getId());
-                        UserEntity userEntity = userDaoService.findById(userId);
-                        if (null != userEntity) {
-                            jsonObject.put("mapped_to_user_id", userEntity.getId());
-                        }
-                    } catch (Exception e) {
-                        LOG.error("", e);
-                    }
-
-                    jsonArray.add(jsonObject);
-
-                } catch (Exception e) {
-
-                    LOG.error("Error while processing record for vm with id {}: ", vm.getId());
-                }
-            });
+            response.setVirtualMachineList(vmList);
         } else {
             //throw exception or just log it if no allocated vms are available
             LOG.info("No vms allocated");
         }
-        return jsonArray.toJSONString();
+        response.setMessage("VM list fetched successfully");
+        response.setCode("200");
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 }

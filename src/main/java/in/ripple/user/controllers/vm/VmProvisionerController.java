@@ -1,11 +1,13 @@
 package in.ripple.user.controllers.vm;
 
 import com.google.gson.Gson;
+import in.ripple.user.ErrorResponse;
 import in.ripple.user.Exception.InternalException;
 import in.ripple.user.Exception.UserNotFoundException;
 import in.ripple.user.configuration.JwtTokenUtil;
 import in.ripple.user.controllers.AbstractRestController;
 import in.ripple.user.controllers.vm.model.AssignVmRequest;
+import in.ripple.user.controllers.vm.model.AssignVmResponse;
 import in.ripple.user.persistence.dao.UserDaoService;
 import in.ripple.user.persistence.dao.UserVMMappingDaoService;
 import in.ripple.user.persistence.dao.VirtualMachineDaoService;
@@ -16,7 +18,10 @@ import in.ripple.user.util.Validator;
 import org.json.simple.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,83 +48,91 @@ public class VmProvisionerController extends AbstractRestController {
     @Autowired
     Validator validator;
 
+    @PreAuthorize("hasAuthority('assignVm')")
     @Override
     @CrossOrigin
-    @PostMapping(value = "/assignVm", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "{userRole}/assignVm", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public String process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception {
+    public Object process(HttpServletRequest httpRequest, @RequestBody String jsonRequest) throws Exception {
 
-        LOG.info("started processing request for vm assignment");
-
-        final String token = httpRequest.getHeader("Authorization");//get user from token
-
-        final String userNameFromToken = jwtTokenUtil.getUserNameFromToken(token);// to assign the VM to this user
-
-        final UserEntity userEntity = userDaoService.findByUserName(userNameFromToken);
-
-        if (null == userEntity) {
-            throw new UserNotFoundException("404", "User Not Found");
-        }
-        final AssignVmRequest vm = new Gson().fromJson(jsonRequest, AssignVmRequest.class);
-
-        final JSONObject response = new JSONObject();
-
-        VirtualMachine virtualMachine = new VirtualMachine();
-
-        UserVmMapping userVmMapping = new UserVmMapping();
         try {
-            //get values from user input
-            String os = vm.getOperatingSystem();
+            LOG.info("started processing request for vm assignment");
 
-            long ramSize = vm.getRamSize();
+            final String token = httpRequest.getHeader("Authorization");//get user from token
 
-            long hardDiskSize = vm.getHardDiskSize();
+            final String userNameFromToken = jwtTokenUtil.getUserNameFromToken(token);// to assign the VM to this user
 
-            int cpuCores = vm.getNumberOfCpuCores();
-            //validate
-            if (!(validator.isValidDiskSize(ramSize) && validator.isValidDiskSize(hardDiskSize))) {
+            final UserEntity userEntity = userDaoService.findByUserName(userNameFromToken);
 
-                throw new InternalException("", "Invalid input");
+            if (null == userEntity) {
+                throw new UserNotFoundException("404", "User Not Found");
             }
 
-            //Assign the VM
-            LOG.info("Assigning VM to user {}", userEntity.getUserName());
 
-            virtualMachine.setOsType(os);
+            final AssignVmRequest vm = new Gson().fromJson(jsonRequest, AssignVmRequest.class);
 
-            virtualMachine.setRamInBytes(ramSize);
+            VirtualMachine virtualMachine = new VirtualMachine();
 
-            virtualMachine.setHardDiskInBytes(hardDiskSize);
+            UserVmMapping userVmMapping = new UserVmMapping();
+            try {
+                //get values from user input
+                String os = vm.getOperatingSystem();
 
-            virtualMachine.setCpuCores(cpuCores);
+                long ramSize = vm.getRamSize();
 
-            virtualMachine.setAllocated(true);
+                long hardDiskSize = vm.getHardDiskSize();
 
-            virtualMachine.setAddress("127.0l0.1");//assigned some static ip
+                int cpuCores = vm.getNumberOfCpuCores();
+                //validate
+                if (!(validator.isValidDiskSize(ramSize) && validator.isValidDiskSize(hardDiskSize))) {
 
-            virtualMachine = virtualMachineDaoService.save(virtualMachine);
+                    throw new InternalException("", "Invalid input");
+                }
 
-            //VM assigned
+                //Assign the VM
+                LOG.info("Assigning VM to user {}", userEntity.getUserName());
 
-            //Create the user to vm mapping
-            userVmMapping.setVmId(virtualMachine.getId());
+                virtualMachine.setOsType(os);
 
-            Long userId = userEntity.getId();
+                virtualMachine.setRamInBytes(ramSize);
 
-            userVmMapping.setUserId(userId);
+                virtualMachine.setHardDiskInBytes(hardDiskSize);
 
-            userVmMapping.setAllocated(true);
+                virtualMachine.setCpuCores(cpuCores);
 
-            userVMMappingDaoService.save(userVmMapping);
+                virtualMachine.setAllocated(true);
 
-            LOG.info("VM assigned");
+                virtualMachine.setAddress("127.0l0.1");//assigned some static ip
 
-            response.put("message", "VM provisioning successful");
+                virtualMachine = virtualMachineDaoService.save(virtualMachine);
 
+                //VM assigned
+
+                //Create the user to vm mapping
+                userVmMapping.setVmId(virtualMachine.getId());
+
+                Long userId = userEntity.getId();
+
+                userVmMapping.setUserId(userId);
+
+                userVmMapping.setAllocated(true);
+
+                userVMMappingDaoService.save(userVmMapping);
+
+                LOG.info("VM assigned");
+
+            } catch (Exception e) {
+                throw new InternalException(e.getMessage());
+            }
+        } catch (InternalException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity(new ErrorResponse(HttpStatus.NOT_FOUND, "User not found"), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            throw new InternalException(e.getMessage());
+            return new ResponseEntity(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Some internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return response.toJSONString();
+         AssignVmResponse response= new AssignVmResponse("200","VM assignment done");
+         return new ResponseEntity(response, HttpStatus.OK);
     }
 
 }

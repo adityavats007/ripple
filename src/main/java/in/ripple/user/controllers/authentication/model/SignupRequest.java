@@ -1,17 +1,25 @@
 package in.ripple.user.controllers.authentication.model;
 
+import lombok.NonNull;
+
 public class SignupRequest {
 
-     String userName;
+    @NonNull
+    String userName;
 
+    @NonNull
     String email;
 
+    @NonNull
     String mobileNumber;
 
+    @NonNull
     String password;
 
+    @NonNull
     String role;
 
+    @NonNull
     Boolean isUserNameSameAsEmail;
 
     public String getUserName() {
