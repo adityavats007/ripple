@@ -1,4 +1,4 @@
-package in.ripple.user.Exception;
+package in.ripple.user.exception;
 
 public class DuplicateUserException extends CustomException {
 

@@ -1,4 +1,4 @@
-package in.ripple.user.Exception;
+package in.ripple.user.exception;
 
 public class InternalException extends CustomException{
 

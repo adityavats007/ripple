@@ -2,8 +2,8 @@ package in.ripple.user.controllers.authentication;
 
 import com.google.gson.Gson;
 import in.ripple.user.util.ErrorResponse;
-import in.ripple.user.Exception.InternalException;
-import in.ripple.user.Exception.UserNotFoundException;
+import in.ripple.user.exception.InternalException;
+import in.ripple.user.exception.UserNotFoundException;
 import in.ripple.user.constants.UserConstants;
 import in.ripple.user.controllers.AbstractRestController;
 import in.ripple.user.controllers.authentication.model.DeleteUserRequest;
